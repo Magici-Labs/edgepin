@@ -45,7 +45,8 @@ fades out a second later. Edge Line in the menu switches it to Always or Off.
   run the full height; top and bottom fit between them.
 - Pinning snaps the window flush to the edge and full length. It keeps its
   width, unless it was nearly filling the screen, then it gets a third.
-- Drag the inner side to resize the strip. Drag the window itself more than a
+- Drag the inner side to resize the strip. A strip can grow until 160pt is
+  left between it and the opposite one. Drag the window itself more than a
   little away from the edge to unpin it.
 - Only windows that overlap a strip are touched. A window mostly inside one is
   moved out whole instead of trimmed to a sliver.

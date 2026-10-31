@@ -50,9 +50,27 @@ final class LayoutTests: XCTestCase {
     }
 
     func testInitialThickness() {
-        XCTAssertEqual(Layout.initialThickness(of: CGRect(x: 0, y: 0, width: 500, height: 400), edge: .left, in: v), 500)
-        XCTAssertEqual(Layout.initialThickness(of: CGRect(x: 0, y: 0, width: 1400, height: 400), edge: .left, in: v), 480)
-        XCTAssertEqual(Layout.initialThickness(of: CGRect(x: 0, y: 0, width: 50, height: 400), edge: .left, in: v), 120)
+        let l = Layout(visible: v)
+        XCTAssertEqual(l.initialThickness(of: CGRect(x: 0, y: 0, width: 500, height: 400), edge: .left), 500)
+        XCTAssertEqual(l.initialThickness(of: CGRect(x: 0, y: 0, width: 1400, height: 400), edge: .left), 480)
+        XCTAssertEqual(l.initialThickness(of: CGRect(x: 0, y: 0, width: 50, height: 400), edge: .left), 120)
+    }
+
+    func testPinCanGrowUntilTheMiddleIsSmall() {
+        // Nothing opposite: all but minKept.
+        XCTAssertEqual(Layout(visible: v).clampThickness(2000, edge: .bottom), 875 - 160)
+        // Pins on the sides don't limit a bottom pin's height.
+        let sides = Layout(visible: v, thickness: [.left: 400, .right: 400])
+        XCTAssertEqual(sides.clampThickness(700, edge: .bottom), 700)
+    }
+
+    func testOppositePinsLeaveRoomBetween() {
+        let l = Layout(visible: v, thickness: [.left: 900])
+        XCTAssertEqual(l.clampThickness(800, edge: .right), 1440 - 900 - 160)
+        XCTAssertEqual(l.initialThickness(of: CGRect(x: 0, y: 0, width: 600, height: 400), edge: .right), 380)
+        // Squeezed for room, a pin still keeps its minimum.
+        let wide = Layout(visible: v, thickness: [.left: 1300])
+        XCTAssertEqual(wide.clampThickness(500, edge: .right), Layout.minThickness)
     }
 
     func testOffsetFromEdge() {
