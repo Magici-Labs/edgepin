@@ -130,9 +130,7 @@ final class Pinner {
     /// all of it. Clicking again puts the window back where it was. Returns
     /// false to leave the click to macOS, on screens with nothing pinned.
     func zoom(_ window: AXUIElement) -> Bool {
-        guard let f = window.frame, let screen = Self.screen(containing: f) else { return false }
-        let layout = layout(for: screen)
-        guard !layout.thickness.isEmpty else { return false }
+        guard let (layout, f) = zoomTarget(window) else { return false }
         // A pinned window already has its size; zooming it would take over the screen.
         guard pin(for: window) == nil else { return true }
         let ref = WindowRef(window)
@@ -143,6 +141,32 @@ final class Pinner {
             window.setFrame(layout.free)
         }
         return true
+    }
+
+    /// Window → Fill (fn-⌃F): fill what is left of the screen. Unlike zoom it
+    /// doesn't toggle; restore undoes it.
+    func fill(_ window: AXUIElement) -> Bool {
+        guard let (layout, f) = zoomTarget(window) else { return false }
+        guard pin(for: window) == nil else { return true }
+        if !f.isClose(to: layout.free, within: 4) { unzoomed[WindowRef(window)] = f }
+        window.setFrame(layout.free)
+        return true
+    }
+
+    /// Window → Return to Previous Size (fn-⌃R), when the fill was ours.
+    func restore(_ window: AXUIElement) -> Bool {
+        guard let (layout, _) = zoomTarget(window),
+              let old = unzoomed.removeValue(forKey: WindowRef(window)) else { return false }
+        window.setFrame(layout.squeeze(old))
+        return true
+    }
+
+    /// The layout of the window's screen, or nil when nothing is pinned there
+    /// and macOS can zoom and fill the usual way.
+    private func zoomTarget(_ window: AXUIElement) -> (Layout, CGRect)? {
+        guard let f = window.frame, let screen = Self.screen(containing: f) else { return nil }
+        let layout = layout(for: screen)
+        return layout.thickness.isEmpty ? nil : (layout, f)
     }
 
     /// Where a pin's strip is right now, for drawing its edge line.
@@ -223,8 +247,13 @@ final class Pinner {
     // MARK: Keeping strips clear
 
     /// Runs once the mouse button is up, so a window being dragged or resized is
-    /// left alone until the user lets go. Also coalesces bursts of events.
+    /// left alone until the user lets go. With the mouse already up it runs
+    /// straight away, which keeps the flash from a fill or zoom short.
     private func later(_ window: AXUIElement, _ action: @escaping () -> Void) {
+        if mouseTimer == nil, NSEvent.pressedMouseButtons == 0 {
+            action()
+            return
+        }
         afterMouseUp[WindowRef(window)] = action
         guard mouseTimer == nil else { return }
         mouseTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] t in

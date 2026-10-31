@@ -28,6 +28,9 @@ extension AXUIElement {
     var title: String? { value(kAXTitleAttribute) as? String }
     var windows: [AXUIElement] { value(kAXWindowsAttribute) as? [AXUIElement] ?? [] }
     var focusedWindow: AXUIElement? { element(kAXFocusedWindowAttribute) }
+    /// The window a button, toolbar or other element belongs to.
+    var window: AXUIElement? { element(kAXWindowAttribute) }
+    var role: String? { value(kAXRoleAttribute) as? String }
     var mainWindow: AXUIElement? { element(kAXMainWindowAttribute) }
     var isMinimized: Bool { value(kAXMinimizedAttribute) as? Bool ?? false }
     var isFullScreen: Bool { value("AXFullScreen") as? Bool ?? false }

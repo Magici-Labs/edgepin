@@ -6,8 +6,10 @@ cd "$(dirname "$0")"
 APP=EdgePin.app
 ID=com.magicilabs.edgepin
 
-swift build -c release
-BIN="$(swift build -c release --show-bin-path)/EdgePin"
+# Universal, so the same zip runs on Apple Silicon and Intel Macs.
+ARCHS="--arch arm64 --arch x86_64"
+swift build -c release $ARCHS
+BIN="$(swift build -c release $ARCHS --show-bin-path)/EdgePin"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"

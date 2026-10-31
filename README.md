@@ -8,6 +8,14 @@ Unpin it, or close it, and the space is just empty desktop again. Nothing grows
 back into it on its own.
 
 ```
+brew install --cask magici-labs/tap/edgepin
+```
+
+installs the signed and notarized app into `/Applications`. Use the full name:
+Homebrew 7 only loads casks from a tap you have trusted, and the full name
+trusts it. To build from source instead,
+
+```
 ./install.sh
 ```
 
@@ -41,11 +49,12 @@ fades out a second later. Edge Line in the menu switches it to Always or Off.
   little away from the edge to unpin it.
 - Only windows that overlap a strip are touched. A window mostly inside one is
   moved out whole instead of trimmed to a sliver.
-- Maximizing a window fills what is left of the screen. ⌥-clicking the green
-  button goes there directly, and clicking again puts the window back. Other
-  ways of maximizing (double-clicking the title bar, Window → Fill, other
-  tools) let macOS fill the whole screen first, and the window is trimmed
-  right after.
+- Maximizing a window fills what is left of the screen. These go there
+  directly: ⌥-clicking the green button, double-clicking a plain title bar
+  (doing it again puts the window back), and fn-⌃F, with fn-⌃R to undo it.
+  Everything else (Window → Fill from the menu, apps with their own title
+  bars like Chrome and VS Code, dragging to the top edge, other tools) fills
+  the whole screen first, and the window is trimmed right after.
 - A pinned window only holds its strip while it is showing. When it is
   minimized, hidden, on another Space or in full screen, other windows can use
   the space; when it comes back, they are trimmed again.
@@ -64,6 +73,18 @@ macOS remembers the Accessibility permission per code signature, and an ad-hoc
 signature changes on every build. `make-app.sh` signs with the first Apple
 Development certificate in the keychain so the permission sticks; set
 `SIGN_IDENTITY` to use another one.
+
+## Releasing
+
+`./publish.sh 0.1.0`, from `main`, builds a universal app, signs it with the
+Developer ID, has Apple notarize it, tags the commit, creates the GitHub
+release with the zip attached, and opens a pull request on
+[homebrew-tap](https://github.com/Magici-Labs/homebrew-tap) with the cask
+updated to the new version and checksum. It needs the GitHub CLI, the tap
+checked out next to this repo, and a notarytool profile called `magicilabs`
+(or set `NOTARY_PROFILE`).
+
+The repo has to be public for `brew` to download the release.
 
 ## Notes and limits
 

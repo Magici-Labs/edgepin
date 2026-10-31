@@ -1,12 +1,13 @@
 import AppKit
 import ApplicationServices
 
-/// Catches clicks on a window's green button before the app sees them.
+/// Catches clicks on a window's green button and title bar before the app sees them.
 ///
-/// ⌥-click: left to macOS, the window animates out to the whole screen and only
-/// then gets trimmed out of the strip; caught here, it goes straight to the
-/// free area. Right-click (or ⌃-click), which macOS does nothing with, opens
-/// the pin menu for that window.
+/// ⌥-click on the green button, or a double-click on the title bar: left to
+/// macOS, the window animates out to the whole screen and only then gets
+/// trimmed out of the strip; caught here, it goes straight to the free area.
+/// Right-click (or ⌃-click) on the green button, which macOS does nothing
+/// with, opens the pin menu for that window.
 final class GreenButton {
     /// Return true when the click was handled, false to pass it on to macOS.
     var onZoom: (AXUIElement) -> Bool = { _ in false }
@@ -48,6 +49,13 @@ final class GreenButton {
             guard let window = Self.window(atGreenButton: event.location), onZoom(window) else { return false }
             swallowUp = .leftMouseUp
             return true
+        case .leftMouseDown where event.getIntegerValueField(.mouseEventClickState) == 2:
+            // A title bar double-click zooms the same way as ⌥-click, unless the
+            // user set it to minimize or do nothing.
+            guard Self.doubleClickZooms, let window = Self.window(atTitleBar: event.location),
+                  onZoom(window) else { return false }
+            swallowUp = .leftMouseUp
+            return true
         default:
             return false
         }
@@ -61,6 +69,39 @@ final class GreenButton {
         // returns, or the system disables the tap for being too slow.
         DispatchQueue.main.async { [weak self] in self?.onMenu(window, p) }
         return true
+    }
+
+    /// System Settings → Desktop & Dock → "Double-click a window's title bar to".
+    /// Unset means the default, which zooms.
+    private static var doubleClickZooms: Bool {
+        let d = UserDefaults.standard
+        if let action = d.string(forKey: "AppleActionOnDoubleClick") {
+            return action != "Minimize" && action != "None"
+        }
+        return !d.bool(forKey: "AppleMiniaturizeOnDoubleClick")
+    }
+
+    /// The window whose title bar is at this point. Only plain title bars and
+    /// toolbars count: apps that draw their own (Chrome, VS Code) report tabs
+    /// and buttons there, and those are left to the app.
+    private static func window(atTitleBar p: CGPoint) -> AXUIElement? {
+        var hit: AXUIElement?
+        guard AXUIElementCopyElementAtPosition(AXUIElementCreateSystemWide(), Float(p.x), Float(p.y), &hit) == .success,
+              let element = hit else { return nil }
+        let window: AXUIElement
+        switch element.role {
+        case kAXWindowRole:
+            // The window itself answers for any spot with nothing on it, so make
+            // sure the click is in the title bar strip and not the content.
+            guard let f = element.frame, p.y - f.minY < 32 else { return nil }
+            window = element
+        case kAXToolbarRole:
+            guard let w = element.window else { return nil }
+            window = w
+        default:
+            return nil
+        }
+        return window.isStandardWindow ? window : nil
     }
 
     /// The window whose green button is at this point, if there is one. Event

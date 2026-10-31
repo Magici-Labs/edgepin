@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let lines = EdgeLines()
     private var hotkeys: Hotkeys?
     private let greenButton = GreenButton()
+    private let fillKeys = FillKeys()
     private var statusItem: NSStatusItem!
     /// The app the user was in before clicking the menu bar icon.
     private var lastApp: NSRunningApplication?
@@ -73,6 +74,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         greenButton.onZoom = { [weak self] in self?.pinner.zoom($0) ?? false }
         greenButton.onMenu = { [weak self] in self?.showWindowMenu($0, at: $1) }
         greenButton.start()
+        fillKeys.onFill = { [weak self] in self?.pinner.fill($0) ?? false }
+        fillKeys.onRestore = { [weak self] in self?.pinner.restore($0) ?? false }
+        fillKeys.start()
         log("started")
     }
 
