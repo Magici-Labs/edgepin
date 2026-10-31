@@ -1,4 +1,4 @@
-// Renders the app icon, icon/icon.png: a white pin with sparkles on an orange
+// Renders the app icon, icon/icon.png: an upright white pin with sparkles on an orange
 // rounded square, with a lighter strip down the left side for the pinned
 // window's strip. Uses the standard macOS icon grid.
 //
@@ -42,16 +42,10 @@ func symbol(_ name: String, _ pointSize: CGFloat, _ color: NSColor) -> NSImage {
     return NSImage(systemSymbolName: name, accessibilityDescription: nil)!.withSymbolConfiguration(config)!
 }
 
-// Drawn centred on a point, turned by the given angle.
-func draw(_ image: NSImage, at center: NSPoint, angle: CGFloat = 0) {
-    NSGraphicsContext.saveGraphicsState()
-    let t = NSAffineTransform()
-    t.translateX(by: center.x, yBy: center.y)
-    t.rotate(byDegrees: angle)
-    t.concat()
+// Drawn centred on a point.
+func draw(_ image: NSImage, at center: NSPoint) {
     let s = image.size
-    image.draw(in: NSRect(x: -s.width / 2, y: -s.height / 2, width: s.width, height: s.height))
-    NSGraphicsContext.restoreGraphicsState()
+    image.draw(in: NSRect(x: center.x - s.width / 2, y: center.y - s.height / 2, width: s.width, height: s.height))
 }
 
 shape.addClip()
@@ -60,14 +54,14 @@ shape.addClip()
 NSColor.white.withAlphaComponent(0.22).setFill()
 NSRect(x: tile.minX, y: tile.minY, width: 250, height: tile.height).fill()
 
-// The pin, tipped over a little as if just pushed in, with a shadow under it.
+// The pin, with a shadow under it.
 NSGraphicsContext.saveGraphicsState()
 let pinShadow = NSShadow()
 pinShadow.shadowColor = NSColor.black.withAlphaComponent(0.25)
 pinShadow.shadowOffset = NSSize(width: 8, height: -14)
 pinShadow.shadowBlurRadius = 20
 pinShadow.set()
-draw(symbol("pin.fill", 400, .white), at: NSPoint(x: tile.midX + 10, y: tile.midY - 10), angle: 30)
+draw(symbol("pin.fill", 400, .white), at: NSPoint(x: tile.midX + 40, y: tile.midY - 30))
 NSGraphicsContext.restoreGraphicsState()
 
 // Sparkles: a big one and a small one at the top right.
