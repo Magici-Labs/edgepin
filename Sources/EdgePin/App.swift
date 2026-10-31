@@ -104,10 +104,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func updateIcon() {
-        let image = NSImage(systemSymbolName: pinner.pins.contains(where: \.active) ? "pin.fill" : "pin",
-                            accessibilityDescription: "EdgePin")
-        image?.isTemplate = true
-        statusItem.button?.image = image
+        statusItem.button?.image = Self.menuIcon(filled: pinner.pins.contains(where: \.active))
+    }
+
+    /// The pin symbol with a small sparkle at its top right, like the app icon.
+    /// Filled while a pin is showing.
+    static func menuIcon(filled: Bool) -> NSImage? {
+        let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .regular)
+        guard let pin = NSImage(systemSymbolName: filled ? "pin.fill" : "pin", accessibilityDescription: nil)?
+                .withSymbolConfiguration(config),
+              let sparkle = NSImage(systemSymbolName: "sparkle", accessibilityDescription: nil)?
+                .withSymbolConfiguration(.init(pointSize: 7, weight: .semibold))
+        else { return nil }
+        let size = NSSize(width: pin.size.width + sparkle.size.width * 0.4, height: pin.size.height + 1)
+        let image = NSImage(size: size, flipped: false) { _ in
+            pin.draw(at: .zero, from: .zero, operation: .sourceOver, fraction: 1)
+            sparkle.draw(at: NSPoint(x: size.width - sparkle.size.width, y: size.height - sparkle.size.height),
+                         from: .zero, operation: .sourceOver, fraction: 1)
+            return true
+        }
+        image.isTemplate = true
+        image.accessibilityDescription = "EdgePin"
+        return image
     }
 
     // MARK: Menu
