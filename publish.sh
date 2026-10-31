@@ -1,7 +1,8 @@
 #!/bin/sh
 # Cuts a release: builds the app, signs it with the Developer ID, has Apple
 # notarize it, tags the current commit, uploads the zip to a GitHub release,
-# and opens a pull request on ../homebrew-tap with the updated cask.
+# and opens a pull request on ../homebrew-tap with the updated cask (and, the
+# first time, an EdgePin section in its README).
 #
 #   ./publish.sh 0.1.0
 #
@@ -61,7 +62,19 @@ git -C "$TAP" checkout -q -B "$BRANCH" origin/main
 mkdir -p "$TAP/Casks"
 sed -e "s|^  version \".*\"|  version \"$VERSION\"|" \
     -e "s|^  sha256 \".*\"|  sha256 \"$SHA\"|" Casks/edgepin.rb > "$TAP/Casks/edgepin.rb"
-git -C "$TAP" add Casks/edgepin.rb
+# The first release also lists EdgePin in the tap's README.
+grep -q '^## edgepin' "$TAP/README.md" || cat >> "$TAP/README.md" <<'EOF'
+
+## edgepin
+
+Menu bar app that pins a window to a screen edge and keeps other windows out of
+its space. See [Magici-Labs/edgepin](https://github.com/Magici-Labs/edgepin).
+
+```
+brew install --cask magici-labs/tap/edgepin
+```
+EOF
+git -C "$TAP" add Casks/edgepin.rb README.md
 git -C "$TAP" commit -q -m "edgepin $VERSION"
 git -C "$TAP" push -qf origin "$BRANCH"
 gh pr create --repo Magici-Labs/homebrew-tap --head "$BRANCH" --base main \
