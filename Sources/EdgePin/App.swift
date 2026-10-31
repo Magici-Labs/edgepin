@@ -177,7 +177,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private static var versionTitle: String {
         let v = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
-        return v.map { "EdgePin \($0)" } ?? "EdgePin (dev build)"
+        return v.map { "MagiciLabs EdgePin \($0)" } ?? "MagiciLabs EdgePin (dev build)"
     }
 
     /// Left, Right, Top, Bottom, with their shortcuts, acting on menuTarget.
