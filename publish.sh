@@ -18,7 +18,7 @@ set -e
 
 cd "$(dirname "$0")"
 VERSION="${1:?usage: ./publish.sh 0.1.0}"
-REPO="Magici-Labs/edgepin"
+REPO="magicilabs/edgepin"
 ZIP="dist/EdgePin-$VERSION.zip"
 TAP=../homebrew-tap
 NOTARY_PROFILE="${NOTARY_PROFILE:-magicilabs}"
@@ -26,9 +26,9 @@ NOTARY_PROFILE="${NOTARY_PROFILE:-magicilabs}"
 command -v gh >/dev/null || { echo "install the GitHub CLI first: brew install gh" >&2; exit 1; }
 gh auth status >/dev/null 2>&1 || { echo "sign in first: gh auth login" >&2; exit 1; }
 # Releases show the account that created them, so make sure it is the right one.
-[ "$(gh api user --jq .login)" = magicilabs ] || { echo "switch first: gh auth switch -u magicilabs" >&2; exit 1; }
+[ "$(gh api user --jq .login)" = magicilabs-admin ] || { echo "switch first: gh auth switch -u magicilabs-admin" >&2; exit 1; }
 git diff --quiet HEAD || { echo "commit or stash your changes first" >&2; exit 1; }
-[ -d "$TAP/.git" ] || { echo "check out Magici-Labs/homebrew-tap next to this repo first" >&2; exit 1; }
+[ -d "$TAP/.git" ] || { echo "check out magicilabs/homebrew-tap next to this repo first" >&2; exit 1; }
 
 if [ -z "$SIGN_IDENTITY" ]; then
 	SIGN_IDENTITY=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer ID Application: [^"]*\)".*/\1/p' | head -1)
@@ -68,20 +68,20 @@ grep -q '^## edgepin' "$TAP/README.md" || cat >> "$TAP/README.md" <<'EOF'
 ## edgepin
 
 Menu bar app that pins a window to a screen edge and keeps other windows out of
-its space. See [Magici-Labs/edgepin](https://github.com/Magici-Labs/edgepin).
+its space. See [magicilabs/edgepin](https://github.com/magicilabs/edgepin).
 
 ```
-brew install --cask magici-labs/tap/edgepin
+brew install --cask magicilabs/tap/edgepin
 ```
 EOF
 git -C "$TAP" add Casks/edgepin.rb README.md
 git -C "$TAP" commit -q -m "edgepin $VERSION"
 git -C "$TAP" push -qf origin "$BRANCH"
-gh pr create --repo Magici-Labs/homebrew-tap --head "$BRANCH" --base main \
+gh pr create --repo magicilabs/homebrew-tap --head "$BRANCH" --base main \
 	--title "edgepin $VERSION" --body "Cask for EdgePin $VERSION." \
 	|| echo "pull request for $BRANCH already open"
 git -C "$TAP" checkout -q main
 
 echo
 echo "released v$VERSION  sha256=$SHA"
-echo "merge the tap pull request, then: brew install --cask magici-labs/tap/edgepin"
+echo "merge the tap pull request, then: brew install --cask magicilabs/tap/edgepin"

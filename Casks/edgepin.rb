@@ -2,15 +2,15 @@
 # opens a pull request with this file against ../homebrew-tap.
 #
 # Users then run:
-#   brew install --cask magici-labs/tap/edgepin
+#   brew install --cask magicilabs/tap/edgepin
 cask "edgepin" do
   version "0.1.0"
   sha256 "0000000000000000000000000000000000000000000000000000000000000000"
 
-  url "https://github.com/Magici-Labs/edgepin/releases/download/v#{version}/EdgePin-#{version}.zip"
+  url "https://github.com/magicilabs/edgepin/releases/download/v#{version}/EdgePin-#{version}.zip"
   name "EdgePin"
   desc "Pin a window to a screen edge and keep other windows out of its space"
-  homepage "https://github.com/Magici-Labs/edgepin"
+  homepage "https://github.com/magicilabs/edgepin"
 
   depends_on macos: :ventura
 
