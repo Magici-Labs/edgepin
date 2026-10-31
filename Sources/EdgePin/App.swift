@@ -116,7 +116,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
               let sparkle = NSImage(systemSymbolName: "sparkle", accessibilityDescription: nil)?
                 .withSymbolConfiguration(.init(pointSize: 7, weight: .semibold))
         else { return nil }
-        let size = NSSize(width: pin.size.width + sparkle.size.width * 0.4, height: pin.size.height + 1)
+        // Whole points only: a fractional size gets centred on a half pixel in
+        // the menu bar, which blurs it on 1x screens.
+        let size = NSSize(width: (pin.size.width + sparkle.size.width * 0.4).rounded(),
+                          height: pin.size.height.rounded() + 1)
         let image = NSImage(size: size, flipped: false) { _ in
             pin.draw(at: .zero, from: .zero, operation: .sourceOver, fraction: 1)
             sparkle.draw(at: NSPoint(x: size.width - sparkle.size.width, y: size.height - sparkle.size.height),
