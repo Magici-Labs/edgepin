@@ -100,12 +100,11 @@ final class Pinner {
         guard window.isStandardWindow else { onMessage("Can't pin this window"); return }
         guard !window.isFullScreen else { onMessage("Leave full screen first"); return }
         guard let f = window.frame, let screen = Self.screen(containing: f) else { return }
-        let v = screen.axVisibleFrame
-        let e = edge ?? Layout.nearestEdge(of: f, in: v)
+        let e = edge ?? Layout.nearestEdge(of: f, in: screen.axVisibleFrame)
 
         pins.removeAll { CFEqual($0.window, window) || ($0.displayID == screen.displayID && $0.edge == e) }
         let pin = Pin(window: window, edge: e, displayID: screen.displayID,
-                      thickness: Layout.initialThickness(of: f, edge: e, in: v))
+                      thickness: layout(for: screen).initialThickness(of: f, edge: e))
         pins.append(pin)
         if let observer = observers[pin.pid] { watch(window: window, observer: observer) }
         log("pinned \(pin.name) \(e.rawValue) \(Int(pin.thickness))")
@@ -272,7 +271,7 @@ final class Pinner {
         if Layout.offset(of: f, from: pin.edge, in: v) <= 2 {
             // Still against its edge, so it is being resized from the inner side.
             // Make room as it goes rather than when the mouse comes up.
-            let t = Layout.clampThickness(Layout.thickness(of: f, edge: pin.edge), edge: pin.edge, in: v)
+            let t = layout(for: screen).clampThickness(Layout.thickness(of: f, edge: pin.edge), edge: pin.edge)
             if abs(t - pin.thickness) > 0.5 {
                 pin.thickness = t
                 onFlash()

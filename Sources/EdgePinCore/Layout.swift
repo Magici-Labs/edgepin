@@ -7,6 +7,15 @@ public enum Edge: String, CaseIterable {
 
     public var isSide: Bool { self == .left || self == .right }
     public var title: String { rawValue.capitalized }
+
+    public var opposite: Edge {
+        switch self {
+        case .left: return .right
+        case .right: return .left
+        case .top: return .bottom
+        case .bottom: return .top
+        }
+    }
 }
 
 /// The strips pinned windows hold on one screen, and where other windows have to
@@ -123,17 +132,21 @@ public struct Layout {
         edge.isSide ? frame.width : frame.height
     }
 
-    public static func clampThickness(_ t: CGFloat, edge: Edge, in visible: CGRect) -> CGFloat {
+    /// A pin can grow until the space between it and the pin on the opposite
+    /// edge is down to minKept. The pin being changed is the one that stops;
+    /// the opposite one keeps its size.
+    public func clampThickness(_ t: CGFloat, edge: Edge) -> CGFloat {
         let span = edge.isSide ? visible.width : visible.height
-        return min(max(t, minThickness), span * 0.8)
+        let room = span - (thickness[edge.opposite] ?? 0) - Self.minKept
+        return min(max(t, Self.minThickness), max(room, Self.minThickness))
     }
 
     /// The strip a newly pinned window gets: its current width (or height), or a
     /// third of the screen when it was nearly filling it.
-    public static func initialThickness(of frame: CGRect, edge: Edge, in visible: CGRect) -> CGFloat {
+    public func initialThickness(of frame: CGRect, edge: Edge) -> CGFloat {
         let span = edge.isSide ? visible.width : visible.height
-        let size = thickness(of: frame, edge: edge)
-        return clampThickness(size > span * 0.7 ? span / 3 : size, edge: edge, in: visible)
+        let size = Self.thickness(of: frame, edge: edge)
+        return clampThickness(size > span * 0.7 ? span / 3 : size, edge: edge)
     }
 
     /// Touching edges don't count: a window right next to a strip is fine.
