@@ -8,7 +8,7 @@ Unpin it, or close it, and the space is just empty desktop again. Nothing grows
 back into it on its own.
 
 ```
-brew install --cask magici-labs/tap/edgepin
+brew install --cask magicilabs/tap/edgepin
 ```
 
 installs the signed and notarized app into `/Applications`. Use the full name:
@@ -80,7 +80,7 @@ Development certificate in the keychain so the permission sticks; set
 `./publish.sh 0.1.0`, from `main`, builds a universal app, signs it with the
 Developer ID, has Apple notarize it, tags the commit, creates the GitHub
 release with the zip attached, and opens a pull request on
-[homebrew-tap](https://github.com/Magici-Labs/homebrew-tap) with the cask
+[homebrew-tap](https://github.com/magicilabs/homebrew-tap) with the cask
 updated to the new version and checksum. It needs the GitHub CLI, the tap
 checked out next to this repo, and a notarytool profile called `magicilabs`
 (or set `NOTARY_PROFILE`).
