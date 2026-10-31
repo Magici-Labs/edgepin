@@ -1,0 +1,4 @@
+/.build/
+/EdgePin.app/
+/dist/
+.DS_Store
