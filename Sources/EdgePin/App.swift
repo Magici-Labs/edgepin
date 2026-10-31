@@ -174,7 +174,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         login.state = SMAppService.mainApp.status == .enabled ? .on : .off
         menu.addItem(login)
         menu.addItem(.separator())
+        menu.addItem(NSMenuItem(title: Self.versionTitle, action: nil, keyEquivalent: ""))
         menu.addItem(item("Quit EdgePin", #selector(quit), key: "q"))
+    }
+
+    private static var versionTitle: String {
+        let v = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        return v.map { "EdgePin \($0)" } ?? "EdgePin (dev build)"
     }
 
     /// Left, Right, Top, Bottom, with their shortcuts, acting on menuTarget.
