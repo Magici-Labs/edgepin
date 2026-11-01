@@ -186,6 +186,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             let i = item(prefix + edge.title, #selector(pinTarget(_:)),
                          key: String(Character(UnicodeScalar(UInt16(arrow))!)), modifiers: Self.menuModifiers)
             i.representedObject = edge.rawValue
+            i.image = NSImage(systemSymbolName: edge.symbolName, accessibilityDescription: edge.title)
             i.state = current == edge ? .on : .off
             return i
         }
@@ -203,7 +204,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         edgeItems(current: current?.edge, prefix: "Pin ").forEach { menu.addItem($0) }
         if current != nil {
             menu.addItem(.separator())
-            menu.addItem(item("Unpin", #selector(unpinTarget), key: "p", modifiers: Self.menuModifiers))
+            let unpin = item("Unpin", #selector(unpinTarget), key: "p", modifiers: Self.menuModifiers)
+            unpin.image = NSImage(systemSymbolName: "pin.slash", accessibilityDescription: "Unpin")
+            menu.addItem(unpin)
         }
         menu.popUp(positioning: nil, at: point, in: nil)
     }
