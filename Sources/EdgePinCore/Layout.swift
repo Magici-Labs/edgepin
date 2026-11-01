@@ -7,6 +7,8 @@ public enum Edge: String, CaseIterable {
 
     public var isSide: Bool { self == .left || self == .right }
     public var title: String { rawValue.capitalized }
+    /// SF Symbol of a thin strip on this side, for menus.
+    public var symbolName: String { "rectangle.\(rawValue)third.inset.filled" }
 
     public var opposite: Edge {
         switch self {
